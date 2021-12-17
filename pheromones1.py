@@ -1,39 +1,38 @@
 import matplotlib.pyplot as plt
 import math
 
-##################################
-# Taking a more systematic approach.
-# Build a lookup table from the data in Fig. 2.
 # The preference table tells the proportion of ants choosing the E+F branch in
-# two conditions, E+F vs. N, and E+F vs. E.
-# This is converted to a lookup table that tells branch preference ratio as a
-# function of amount of pheromone on each branch.   The conversion assumes an
-# exponential decay in the amount of pheromone.
-
-
-# frac_table_E
-# fraction of ants choosing the E+F branch in the E condition, and N condition.
-# These are the curves in Fig. 2
+# two conditions, E+F vs. N (experiment 1), and E+F vs. E (experiment 2).
+# These preference values are the curves in Fig. 2
 # each increment is 5 time steps.
 # time axis           5    10   15   20   25   30   35   40   45   50
 #                   55    60   65   70   75   80   85   90   95
-gl_frac_table_e = [.94, .91, .83, .75, .68, .62, .56, .51, .52, .49,
-                   .50, .50, .50, .49, .51, .50, .50, .50, .51]
+
+# Experiment 1 behavioral results 
+# fraction of ants choosing the E+F branch vs. the N branch.
 gl_frac_table_n = [.94, .93, .89, .81, .78, .78, .80, .78, .76, .77,
                    .73, .75, .74, .70, .66, .65, .54, .54, .48]
 
+# Experiment 2 behavioral results
+# fraction of ants choosing the E+F branch vs. the E branch
+gl_frac_table_e = [.94, .91, .83, .75, .68, .62, .56, .51, .52, .49,
+                   .50, .50, .50, .49, .51, .50, .50, .50, .51]
+
+# These empirical behavioral preferences are converted to a lookup table
+# that tells branch preference ratio as a function of amount of pheromone on each branch. 
+# The conversion assumes an exponential decay in the amount of pheromone.
 
 # c1 is the assumed amount of pheromone on the E+F branch at the start
 # c2 is the assumed amount of pheromone on the E branch at the start
 # Decay of c1 to the noise level seems to occur after 90 steps.
 # Call the noise level 0.02.
 # this gives a decay rate of -.069
-# 10 exp(90 * -.069) = 0.2
+# 10 exp(90 * -.069) = 0.02
 
 gl_decay = -.069
 # Estimated from the data, how long it takes
 # E+F vs. N to reach the pheromone noise level,
-# starting from C1 = 10.
+# starting from c1 = 10.
 
 gl_noise_level = .02
 # minimum signal level, initial estimate of 0.02
@@ -63,9 +62,10 @@ def setTable():
 
 # gl_lut is a list of tuples:
 # (pheromone1_level, pheromone2_level, preference_fraction)
+
 try:
     gl_lut
-except:
+except:              # see E722, may be a better way than a bare except
     gl_lut = setupTable()
 
 
@@ -79,13 +79,14 @@ def getLUT():
 # for the E+F, E, and N branches, respectively.
 # This is not a parametric model.  This is directly using the data entered into
 # the lookup table simply to re-compute the plots shown in the data.
-# This just demonstrates that a single pheromone decay model can fit the data
-# of Fig. 2. Thus, the claim in the paper,
+# This just demonstrates that a single pheromone decay model can recapitulate
+# the patterns of Fig. 2. Thus, this claim in the paper is overstated:
 # "For example, the observation that the initial frequency of ants choosing
 #  the E+F branch is the same in the E+F vs N and E+F vs E experiments but
 #  these frequencies diverge after 15 min (Fig. 2) is difficult to explain
-#  with a single pheromone."
-#  overstated.  In fact, a single pheromone model does the job.
+#  with a single pheromone." (a single pheromone model isn't tested) .
+# In fact, a single pheromone model does the job.
+
 def testExp2(c1=10, c2=1):
     duration = 120
     fig = plt.figure()
@@ -115,10 +116,9 @@ def testExp2(c1=10, c2=1):
     plt.xlim([0, duration])
     plt.show()
 
+
 # find the entry in the lookup table closest to the ph1/ph2 fraction provided
 # Since the data set is so small, do a linear search to find the closest match.
-
-
 def lookupFraction(ph1, ph2, lut, print_p=False):
     nearest_dist = 1000000
     nearest_frac = -1
@@ -268,6 +268,7 @@ def testExp4(c1=10, c2=1):
     plt.show()
 
 ##################################
+
 # Simulating Experiment 4, "dynamic environment" alternating food placement.
 
 # We can use with the parameters used for Experiment 1-2, but the plot has

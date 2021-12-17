@@ -1,184 +1,7 @@
 import matplotlib.pyplot as plt
 import math
 
-# import imp as imp
-# import pheromones1 as p1
-# imp.reload(p1)
-
-# pheromones1.py is for testing alternative hypotheses to the two-pheromones
-# claim by
-# "The role of multiple pheromones in food recruitment by ants"
-# A. Dussutour, S. C. Nicolis, G. Shephard, M. Beekman, and D. J. T. Sumpter
-# downloaded from ResearchGate to /external-docs/Multiplepheromones2009JEB.pdf
-# I am skeptical that this experiment proves two pheromones.
-
-
-# Assume ants put down the same kind of pheromone whether exploring or
-# (exploiting / gathering)
-# (which they call foraging, F, but that is a mis-use of the word.
-# "Forage" means search for food as well as gather.)
-# But they put down more when exploiting, to leave a stronger trail
-# We'll assume that pheromone decays exponentially with time.
-# There are two experimental conditions, the E+F vs E, and E+F vs N.
-# The E+F branch has pheromone after the ants have both explored and exploited.
-# The E branch has pheromone after ants have only explored only, not exploited.
-# The N branch has no pheromone.
-#
-# My assessment is that the E+F branch leaves a lot of pheromone, say, 10, and
-# the E branch leaves a small but significant amount of pheromone, say, 1.
-# So exploiting leaves 10 times as much pheromone as just exploring.
-#
-# 1. When there are good amounts of pheromone, then the measurement of
-# which path has more pheromone is clear. Preferably choose the path with more.
-# But the choice preference is not just by ratio of amount of pheromone, it is
-# a nonlinear function. If it is clear which branch has more, prefer it no
-# matter the ratio. Let's say the function is a sigmoid.
-#
-# At the start of the experiment, this will take them 95% down the exploit path
-# under both conditions, E+F vs. N (no signal) and E+F vs E (weak signal).
-#
-# 2. When there is skimpy pheromone, the pheromone sensor has to amplify
-# a very weak signal. After doing so, however, there is still a significant
-# difference between pheromone amounts in the E+F vs E branch for a while.
-# But after a while, the difference in the amplified signal becomes less
-# discernable after about 40 minutes.
-# In the E+F vs. N branch, the exponentially decaying pheromone signal still
-# persists in the E+F branch. Compared to the noise level in the N branch,
-# this difference remains somewhat detectable for about 80 minutes.
-
-
-# ############################################3
-# Assume a single pheromone that starts out at concentrations
-# c1 and c2 on two branches respectively.
-# Their amounts decay exponentially, or in one experiment,
-# as the sum of two different exponentials.
-# This is exploration of functional forms for the sensory response
-# and then preference proportion.
-#
-# This section includes a lot of flopping around exploring functional forms.
-# It was useful to use the Desmos online graphing calculator at
-# https://www.desmos.com/calculator
-#
-
-
-def testExp1(c1, c2, decay=0.4):
-    duration = 120
-    fig = plt.figure()
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    br1_ar = []   # exponential decaying pheromone on branch 1
-    br2a_ar = []  # exponential decaying pheromone on branch 2
-    fbr1_ar = []
-    fbr2a_ar = []
-    fbr2b_ar = []
-    ratio2a_ar = []
-    ratio2b_ar = []
-    for m in range(duration):   # minutes
-        br1 = c1 * (math.exp(-decay * m))
-        br2a = c2 * (math.exp(-decay * m))
-        br2b = 0
-        # br1 = c1 * (math.exp(-decay * m) + .5 * math.exp(-decay * .5 * m))
-        # br2a = c2 * (math.exp(-decay * m) + .5 * math.exp(-decay * .5 * m))
-        # br2b = 0
-        fbr1 = funct(br1)     # "E+F"
-        fbr2a = funct(br2a)    # "E"
-        fbr2b = funct(br2b)      # "N"
-        diff12a = math.log(abs(fbr1 - fbr2a) + 1)
-        diff12a = pow(diff12a, 1.5)
-        diff12b = math.log(abs(fbr1 - fbr2b) + 1)
-        diff12b = pow(diff12b, 1.5)
-        # ratio2a = fbr1 / (fbr1 + fbr2a)
-        ratio2a = (.2*diff12a + fbr1) / (fbr1 + fbr2a + diff12a)
-        ratiom2a = ratioMap(ratio2a)
-        # ratio2b = fbr1 / (fbr1 + fbr2b)
-        ratio2b = (.2*diff12b + fbr1) / (fbr1 + fbr2b + diff12b)
-        ratiom2b = ratioMap(ratio2b)
-        if m < 10:
-            print('fbr1: ' + str(fbr1) + ' fbr2a: ' + str(fbr2a) + ' ratio: '
-                  + str(fbr1/fbr2a))
-        br1_ar.append(br1)
-        br2a_ar.append(br2a)
-        fbr1_ar.append(fbr1)
-        fbr2a_ar.append(fbr2a)
-        fbr2b_ar.append(fbr2b)
-        ratio2a_ar.append(ratiom2a)
-        ratio2b_ar.append(ratiom2b)
-    ax1.plot(br1_ar)
-    ax1.plot(br2a_ar)
-    ax1.plot(fbr1_ar, color="g")
-    ax1.plot(fbr2a_ar, color="r")
-    ax1.plot(fbr2b_ar, color="b")
-
-    ax2.plot(ratio2a_ar, color="r")
-    ax2.plot(ratio2b_ar, color="b")
-    plt.xlim([0, duration])
-    plt.show()
-
-
-def ratioMap(x):
-    ret = 1.0 / (1.0 + math.exp(-10.0 * (x - .5)))
-    # print('ratioMap x: ' + str(x) + ' ret: ' + str(ret))
-    return max(0.0, min(1.0, ret))
-
-
-def funct(x):
-    # return math.log(x + 1)
-    t1 = .5 * pow(x, .25) + .5 * x + .2
-    # t1 = .5 * x + .2
-    # t2 = 2 / (1 + math.exp(-2 * t1)) - 1
-    # print('x: ' + str(x) + ' t1: ' + str(t1) + ' t2: ' + str(t2))
-    # t2 = t1 + 1 / (1 + math.exp(-20*x)) - 1 / (1 + math.exp(-5*x))
-    return t1
-
-
-def funct2(x):
-    return x + .01
-
-
-def funct9(x):
-    ret = 1 / (1 + math.exp(-20*x)) - \
-        1 / (1 + math.exp(-5*x)) + x + .1
-    return ret
-
-
-def funct10(x):
-    ret = 1 / (1 + math.exp(-40*x)) + 1*math.log(x+1.6)-1+0.25
-    return ret
-
-
-def funct1(x):
-    ret = 1 / (1 + math.exp(-20*(x+.1))) + .1*x + .5
-    return ret
-
-
-def funct3(x):
-    return math.log(x+1) + \
-        .05 / (1 + math.exp(-50*x)) - \
-        .05 / (1 + math.exp(-2*x)) + .05
-
-
-def funct4(x):
-    # ret = min(1, max(0.01, 1 / (1 + math.exp(-100*x)) - 1 /
-    # (1 + math.exp(-2*x)) + .5))
-    ret = 1 / (1 + math.exp(-100*x)) - \
-          1 / (1 + math.exp(-2*x)) + \
-          5 / (1 + math.exp(-2*x)) - 2.5
-    ret = max(.1, ret)
-    return ret
-
-
-def funct5(x):
-    ret = max(0.01, (math.log(max(.001, 1 / (1 + math.exp(-100*x)) - 1 /
-                                  (1 + math.exp(-2*x))) + x) + .5))
-    return ret
-
-
-def funct6(val):
-    return max(.001, val + 1)
-
-
 ##################################
-
 # Taking a more systematic approach.
 # Build a lookup table from the data in Fig. 2.
 # The preference table tells the proportion of ants choosing the E+F branch in
@@ -446,9 +269,7 @@ def testExp4(c1=10, c2=1):
     plt.show()
 
 ##################################
-#
 # Simulating Experiment 4, "dynamic environment" alternating food placement.
-#
 
 # We can use with the parameters used for Experiment 1-2, but the plot has
 # some differences in appearance from Fig. 10.
@@ -456,7 +277,6 @@ def testExp4(c1=10, c2=1):
 # as close a fit to Fig. 2.  Really, we would need more experimental data to
 # find the right functional form and parameters to fit both figures well and
 # predict other experimental results about ant behavior in this kind of setup.
-#
 
 
 # gl_ants_per_m = 50   #ch2

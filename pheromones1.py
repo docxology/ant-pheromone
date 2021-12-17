@@ -22,13 +22,6 @@ gl_frac_table_e = [.94, .91, .83, .75, .68, .62, .56, .51, .52, .49,
 gl_frac_table_n = [.94, .93, .89, .81, .78, .78, .80, .78, .76, .77,
                    .73, .75, .74, .70, .66, .65, .54, .54, .48]
 
-gl_decay = -.069       # Estimated from the data, how long it takes
-# E+F vs. N to reach the pheromone noise level,
-# starting from C1 = 10.
-
-gl_noise_level = .02
-# equivalent to minimum signal level, seat of the pants guess
-
 
 # c1 is the assumed amount of pheromone on the E+F branch at the start
 # c2 is the assumed amount of pheromone on the E branch at the start
@@ -36,6 +29,14 @@ gl_noise_level = .02
 # Call the noise level 0.02.
 # this gives a decay rate of -.069
 # 10 exp(90 * -.069) = 0.2
+
+gl_decay = -.069
+# Estimated from the data, how long it takes
+# E+F vs. N to reach the pheromone noise level,
+# starting from C1 = 10.
+
+gl_noise_level = .02
+# minimum signal level, initial estimate of 0.02
 
 
 def setupTable(c1=10, c2=1):
@@ -174,11 +175,10 @@ def amplifySignal(x):
     val = 5.5*pow(xpr, .25)
     return val
 
+
 # Returns distance to the midline of equal pheromone amounts.
 # As everywhere, units are arbitrary pheromone amounts, assuming the
 # E+F branch starts with pheromone amount 10.
-
-
 def distToMid(xpr, ypr):
     xm = (xpr + ypr)/2
     ym = xm
@@ -210,6 +210,7 @@ def mapGetRatio(fbr1, fbr2):
         total_ratio = 1.0 - total_ratio
     return total_ratio
 
+
 # Top level function.
 # plot fraction of E+F branch as a function of time using a model of
 # signal detection/amplification and then relative amounts of these,
@@ -224,8 +225,6 @@ def mapGetRatio(fbr1, fbr2):
 #     2c. Multiply the two considerations, distance to midpoint and to origin.
 # This assumes a single pheromone starting with concentrations 10, 1, and .02
 # for the E+F, E, and N branches, respectively.
-
-
 def testExp4(c1=10, c2=1):
     c1 = c1 - gl_noise_level
     c2 = c2 - gl_noise_level
@@ -349,7 +348,7 @@ def fracFromDistToMid_Exp4(dist):
 
 
 # Top level function.
-# This simulates the condition of Fig. 10 
+# This simulates the condition of Fig. 10
 # Food appears at the left branch for gl_trial_duration (45 minutes), then moves to
 # the right branch for 45 minutes, then moves back to the left branch for 45 minutes.
 def simulateDynamic():

@@ -217,9 +217,9 @@ def mapGetRatio(fbr1, fbr2):
 # where the model form and parameters have been estimated in stages from Fig. 2
 # The model is:
 #  1. Amplify pheromone to get a measurement signal
-#  2. Convert the measurement signals from the two branches to a preference ratio.
+#  2. Convert the measurement signals from the two branches to preference ratio
 #     2a. Find distance from the signal amounts to the midpoint of the
-#         equal-amounts line in measurement space.  Map using a squashing function.
+#         equal-amounts line in measurement space. Map using squashing function
 #     2b. Find the distance from the signal amounts to the origin.
 #         Map using a squashing function.
 #     2c. Multiply the two considerations, distance to midpoint and to origin.
@@ -349,8 +349,9 @@ def fracFromDistToMid_Exp4(dist):
 
 # Top level function.
 # This simulates the condition of Fig. 10
-# Food appears at the left branch for gl_trial_duration (45 minutes), then moves to
-# the right branch for 45 minutes, then moves back to the left branch for 45 minutes.
+# Food appears at the left branch for gl_trial_duration (45 minutes),
+# then moves to the right branch for 45 minutes,
+# then moves back to the left branch for 45 minutes.
 def simulateDynamic():
     duration = gl_trial_duration
     ratio_ar = []
@@ -378,15 +379,3 @@ def simulateOnOff():
     ax1.plot(ratio_ar)
     plt.xlim([0, duration*2])
     plt.show()
-
-
-##################################
-# 2021/10/18
-# Experimenting with multi-component pheromones.
-# The ant lays down a single pheromone during exploration or exploitation,
-# but it contains two (for now) chemical components that evaporate at
-# different rates.  The concentration ratio tells how long the pheromone
-# has been there.
-#
-# Accurate measurement of a weak signal near the noise level really requires
-# sampling and integrating the measurement over some period of time.

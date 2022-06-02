@@ -39,7 +39,14 @@
 
 #This runs in Python 3
 
-#>>> import pheromones2 as ph
+
+# Install/import any dependencies
+import matplotlib as matplotlib
+import matplotlib.pyplot as plt
+import math
+
+#>>> import pheromones1 as ph
+
 
 #Plot fraction of E+F branch as a function of time using the lookup table data
 #obtained from Fig. 2.   This is not a parametric model, but it is a preliminary
@@ -53,7 +60,6 @@
 #measurement, and branch preference, based on the amplification + sigmoid
 #product analytical model.
 #>>> ph.runExp12_AnalyticalModel()
-
 
 #Plot branch preference over time given two switches in the branch leading
 #to food, using the analytical model.  This predicts the preference curves
@@ -74,8 +80,7 @@
 
 
 
-import matplotlib.pyplot as plt
-import math
+
 
 
 

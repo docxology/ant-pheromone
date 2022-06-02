@@ -5,9 +5,13 @@
 #A. Dussutour, S. C. Nicolis, G. Shephard, M. Beekman, and D. J. T. Sumpter
 #J Exp Biol. 2009;212: 2337–2348. doi:10.1242/jeb.029827
 
-#pheromones3.py picks up from pheromones2.py by looking into different sets
-#and combinations of values of the free parameters.
-#2022/05/30
+#pheromones3.py picks up from pheromones2.py in these ways:
+#-bundle parameters into a separate data structure called the parameter_bundle.
+#-quantitative least-sequares score for quality of model fit to data
+#-bring in data from Dussutour Exp 4 to score fit quantitatively
+#-use scipy to optimize parameters for Exp 1&2, for Exp 4, and for Exps 1&2
+#and Exp 4 jointly.
+#2022/05/30-2022/06/02 -ES
 
 #Let us  assume ants put down the same kind of pheromone whether exploring or
 #exploiting / gathering.  But they put down more when exploiting, to leave a
@@ -36,7 +40,8 @@
 #the same model to simulate Dussutour Experiment 4, "dynamic environment."
 #
 
-###########################
+
+############################################################
 #
 #How to run:
 #
@@ -52,30 +57,43 @@
 #>>> ph.runExp12_LookupModel()
 
 
-
 #Plot the time course of hypothesized physical pheromone, amplifed pheromone
 #measurement, and branch preference, based on the amplification + sigmoid
 #product analytical model.
-#>>> ph.runExp12_AnalyticalModel()
+#>>> ph.runExp12_AnalyticalModel(<parameter-bundle>)
 
 
 #Plot branch preference over time given two switches in the branch leading
 #to food, using the analytical model.  This predicts the preference curves
 #produced by Dussutour et al. Experiment 4.
-#>>> ph.simulateDynamic()
+#>>> ph.simulateDynamic(<parameter-bundle>)
 
-#Set parameters for simulateDynamic() to the same parameters used for
-#the Experiment 1 & 2 analytical model.
-#>>> ph.setDyanmicSimulationParameters('exp2')
+#Some parameter bundles are provided:
+#gl_initial_parameter_bundle
+#gl_parameter_bundle_opt_12
+#gl_parameter_bundle_opt_12_old   (more exact version of gl_parameter_bundle_opt_12)
+#gl_parameter_bundle_opt_4
+#gl_parameter_bundle_opt_124
+#gl_parameter_bundle_opt_124_approx
 
-#Set parameters for simulateDynamic() to values that better match the
-#preference trajectory of Dussutor's Experiment 4.
-#>>> ph.setDyanmicSimulationParameters('exp4')
+
+#Optimize parameters for data from Dussutour Experiments 1&2
+#>>>ph.findOptimalParameters_Exp12_AnalyticalModel()
+
+#Optimize parameters for data from Dussutour Experiment 4
+#>>>ph.findOptimalParameters_Exp4()
+
+#Optimize parameters for data from Dussutour Experiments 1&2 and Experiment 4 jointly
+#>>>ph.findOptimalParameters_Exp12_Exp4()
+
+#The tradeoffs in optimizations to some extent hinge on the parameter bounds set
+#in gl_param_lower_bounds and gl_param_upper_bounds.
+#More work could be done to explore how these bounds affect the parameter optima found.
+
 
 #
 #
-###########################
-
+############################################################
 
 
 import matplotlib.pyplot as plt
@@ -85,7 +103,8 @@ import numpy as np
 from scipy.optimize import Bounds
 
 
-########################################
+
+############################################################
 #
 #Empirical data
 #
@@ -143,10 +162,10 @@ gl_frac_table_exp4 = [.57, .57, .60, .56, .52, .54, .68, .62, .68, .72,   #0-9
 
 #
 #
-########################################
+############################################################ empirical data
 
 
-########################################
+############################################################
 #
 #Free parameters are kept in a dict or array format called a parameter_bundle.
 #Some parameter_bundles hold parameters estimated manually.
@@ -174,14 +193,34 @@ gl_min_deposit_rate_explore = .1      # pheromone per ant deposited, Exp4 alone
 
 
 
+# c1 is the assumed amount of pheromone on the E+F branch at the start
+# c2 is the assumed amount of pheromone on the E branch at the start
+# Decay of c1 to the noise level seems to occur after 90 steps.
+# Call the noise level 0.02.
+# this gives a decay rate of -.069
+# 10 * exp(90 * -.069) = 0.02
 
 
+def figureDecayRate(c1=10, t=90, noise_level = .02):
+    #print('c1: ' + str(c1) + ' noise_level: ' + str(noise_level))
+    return math.log(noise_level/c1) / t
+
+
+gl_decay_time = 90.0
+
+#This is no longer used.  Instead, decay rate is computed from c1, noise level, and gl_decay_time.
+gl_decay = -.069
+# Estimated from the data, how long it takes
+# E+F vs. N to reach the pheromone noise level,
+# starting from c1 = 10.
 
 
 
 ####################
 #
-#older method for setting parameters by global variables
+#Older method for setting parameters by global variables
+#These parameters are pretty much not used any more, but are kept for reference
+#and just in case.
 #
 
 gl_noise_level = .02
@@ -207,13 +246,18 @@ gl_d_0_r = 8.0
 gl_deposit_rate_exploit = .011    # pheromone per ant deposited, Exp. 4
 gl_deposit_rate_explore = .0011   # pheromone per ant deposited, Exp. 4
 
-
 #
 #
 ####################
 
 
-####################
+
+#
+#
+############################################################ loose parameters
+
+
+############################################################
 #
 #Parameter bundles
 #
@@ -233,7 +277,7 @@ gl_parameter_index_dict = {'c1': 0,
                            'rate_exploit': 11,
                            'rate_explore': 12}
     
-#parameter_bundle  
+#parameter_bundle initially found by manual adjustment.
 gl_initial_parameter_bundle = {'c1': 10, 
                                'c2': 1,  
                                'amp_A': 5.5,
@@ -429,45 +473,16 @@ def printParameterBundle(parameter_bundle):
     print('s_m: ' + str(parameter_bundle_dict.get('s_m')) + '  d_0_m: ' + str(parameter_bundle_dict.get('d_0_m')) + '  m_z: ' + str(parameter_bundle_dict.get('m_z')) + '  s_0: ' + str(parameter_bundle_dict.get('s_0')) +'  s_r: ' + str(parameter_bundle_dict.get('s_r')) +'  d_0_r: ' + str(parameter_bundle_dict.get('s_m')) +'  s_m: ' + str(parameter_bundle_dict.get('d_0_r')) + ' rate_exploit: ' + str(parameter_bundle_dict.get('rate_exploit')) + ' rate_explore: ' + str(parameter_bundle_dict.get('rate_explore')))
 
 
-
 #
 #
-####################
+############################################################ parameter bundles
 
 
-
-# c1 is the assumed amount of pheromone on the E+F branch at the start
-# c2 is the assumed amount of pheromone on the E branch at the start
-# Decay of c1 to the noise level seems to occur after 90 steps.
-# Call the noise level 0.02.
-# this gives a decay rate of -.069
-# 10 * exp(90 * -.069) = 0.02
-
-
-def figureDecayRate(c1=10, t=90, noise_level = .02):
-    #print('c1: ' + str(c1) + ' noise_level: ' + str(noise_level))
-    return math.log(noise_level/c1) / t
-
-
-gl_decay_time = 90.0
-
-gl_decay = -.069
-# Estimated from the data, how long it takes
-# E+F vs. N to reach the pheromone noise level,
-# starting from c1 = 10.
-
-
-
-
-
+############################################################
 #
-#
-########################################
-
-
-########################################
-#
-#
+#This section is the initial demonstration that a single parameter (pheromone)
+#could index a tabular function to generate observed data.
+#This is a precursor to the final analytical model.
 #
 
 
@@ -604,7 +619,14 @@ def plotLUT(max_range=10):
 
 #
 #
-########################################
+############################################################ lookup table
+
+
+
+############################################################
+#
+#Analytical model
+#
     
     
 
@@ -734,10 +756,8 @@ def runExp12_AnalyticalModel(parameter_bundle = gl_initial_parameter_bundle):
     # dist_a_ar = [] # assigned but not used
     # dist_b_ar = [] # assigned but not used
     for m in range(duration):   # duration in minutes
-        #br1 = c1 * math.exp(gl_decay * m) + gl_noise_level
-        #br2a = c2 * math.exp(gl_decay * m) + gl_noise_level
         br1 = c1 * math.exp(decay_rate * m) + noise_level
-        br2a = c2 * math.exp(decay_rate * m) + noise_level        
+        br2a = c2 * math.exp(decay_rate * m) + noise_level
         br2b = noise_level
         #print('m: ' + str(m) + ' br1: ' + str(br1) + ' br2a: ' + str(br2a) + ' br2b: ' + str(br2b))
         fbr1 = amplifySignal(br1, amp_A, noise_level, amp_C)
@@ -1066,11 +1086,16 @@ def exp12_exp4ScoreFunction(parameter_bundle):
 
 
   
-
-
+#
+#
+############################################################
 #
 #
 ################################################################################
+
+
+
+
 
 ################################################################################
 #
@@ -1099,8 +1124,6 @@ def runExp12_AnalyticalModel_orig(c1=10, c2=1):
     # dist_a_ar = [] # assigned but not used
     # dist_b_ar = [] # assigned but not used
     for m in range(duration):   # duration in minutes
-        #br1 = c1 * math.exp(gl_decay * m) + gl_noise_level
-        #br2a = c2 * math.exp(gl_decay * m) + gl_noise_level
         br1 = c1 * math.exp(decay_rate * m) + gl_noise_level
         br2a = c2 * math.exp(decay_rate * m) + gl_noise_level        
         br2b = gl_noise_level

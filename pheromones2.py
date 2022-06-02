@@ -39,7 +39,7 @@
 
 #This runs in Python 3
 
-#>>> import pheromones1 as ph
+#>>> import pheromones2 as ph
 
 #Plot fraction of E+F branch as a function of time using the lookup table data
 #obtained from Fig. 2.   This is not a parametric model, but it is a preliminary

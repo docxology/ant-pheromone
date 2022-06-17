@@ -1,5 +1,5 @@
 
-#pheromones2.py is for testing alternative hypotheses to the two-pheromnes
+#pheromones2.py is for testing alternative hypotheses to the two-pheromones
 #claim put forth in:
 #"The role of multiple pheromones in food recruitment by ants"
 #A. Dussutour, S. C. Nicolis, G. Shephard, M. Beekman, and D. J. T. Sumpter
@@ -42,7 +42,6 @@
 
 
 # Install/import any dependencies
-import matplotlib as matplotlib
 import matplotlib.pyplot as plt
 import math
 
@@ -56,8 +55,7 @@ import math
 #>>> ph.runExp12_LookupModel()
 
 
-
-#Plot the time course of hypothesized physical pheromone, amplifed pheromone
+#Plot the time course of hypothesized physical pheromone, amplified pheromone
 #measurement, and branch preference, based on the amplification + sigmoid
 #product analytical model.
 #>>> ph.runExp12_AnalyticalModel()
@@ -69,21 +67,15 @@ import math
 
 #Set parameters for simulateDynamic() to the same parameters used for
 #the Experiment 1 & 2 analytical model.
-#>>> ph.setDyanmicSimulationParameters('exp2')
+#>>> ph.setDynamicSimulationParameters('exp2')
 
 #Set parameters for simulateDynamic() to values that better match the
 #preference trajectory of Dussutor's Experiment 4.
-#>>> ph.setDyanmicSimulationParameters('exp4')
+#>>> ph.setDynamicSimulationParameters('exp4')
 
 #
 #
 ###########################
-
-
-
-
-
-
 
 # The preference table tells the proportion of ants choosing the E+F branch in
 # two conditions, E+F vs. N (experiment 1), and E+F vs. E (experiment 2).
@@ -221,9 +213,9 @@ def lookupFraction(ph1, ph2, lut, print_p=False):
 
 
 # Plot Lookup table of preference fraction vs  measured pheromone on 2 branches
-# The measured pheremone is the exponentially decreasing amount of pheromone,
+# The measured pheromone is the exponentially decreasing amount of pheromone,
 # but mapped through the measurement function amplifySignal()
-# which nonlinearly amplifies small amounts.
+# which non-linearly amplifies small amounts.
 # Preference fraction is the size of the circle.
 def plotLUT(max_range=10):
     global gl_lut
@@ -287,7 +279,7 @@ def fracFromDistToMid(dist):
 def mapGetRatio(fbr1, fbr2):
     dist_to_mid_2 = distToMid(fbr1, fbr2)
     dist_to_mid_ratio_factor = fracFromDistToMid(dist_to_mid_2)
-    dist_to_orig = pow(pow(fbr1, 2) + pow((fbr2), 2), .5)
+    dist_to_orig = pow(pow(fbr1, 2) + pow(fbr2, 2), .5)
     dist_to_orig_ratio_factor = .6 + .4 * 1 / (1 + math.exp(-.8 * (dist_to_orig-8)))
     total_ratio = (dist_to_mid_ratio_factor * dist_to_orig_ratio_factor) / 2 + .5
     if fbr2 > fbr1:
@@ -353,8 +345,6 @@ def runExp12_AnalyticalModel(c1=10, c2=1):
     plt.show()
 
 
-
-    
 ##################################
 
 # Simulating Experiment 4, "dynamic environment" alternating food placement.
@@ -368,8 +358,7 @@ def runExp12_AnalyticalModel(c1=10, c2=1):
 
 
 # gl_ants_per_m = 50   #ch2
-gl_ants_per_m = 30    #better fit to Exp. 4 data
-
+gl_ants_per_m = 30    # better fit to Exp. 4 data
 
 
 gl_deposit_rate_exploit = .011    # pheromone per ant deposited
@@ -391,6 +380,7 @@ gl_trial_duration = 45
 #simulation of Experiment 4.
 gl_exp_2_parameters_p = False
 
+
 #call with directive = 'exp2' or 'exp4'
 def setDynamicSimulationParameters(directive = None):
     if directive != 'exp2' and directive != 'exp4':
@@ -400,13 +390,12 @@ def setDynamicSimulationParameters(directive = None):
     global gl_ants_per_m
     if directive == 'exp2':
         gl_exp_2_parameters_p = True
-        gl_ants_per_m = 50    #as described in the Dussutour paper
+        gl_ants_per_m = 50    # as described in the Dussutour paper
     elif directive == 'exp4':
         gl_exp_2_parameters_p = False
-        gl_ants_per_m = 30    #a better fit to the Exp. 4 data
+        gl_ants_per_m = 30    # a better fit to the Exp. 4 data
     else:
         print('unrecognized directive: ' + str(directive))
-
 
 
 def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
@@ -418,7 +407,7 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
         ratio_ar = []
     for m in range(duration):   # duration in minutes
 
-        #choose whether to use paremeters chosen to fit Dussutour Experiments 1 and 2,
+        #choose whether to use parameters chosen to fit Dussutour Experiments 1 and 2,
         #or else use parameters that better fit their Experiment 4.
         if gl_exp_2_parameters_p:
             fph1 = amplifySignal(ph1)
@@ -450,10 +439,10 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
               
         ph1 = max(ph1_next, gl_noise_level)
         ph2 = max(ph2_next, gl_noise_level)
-    return(ph1, ph2)
+    return ph1, ph2
 
 
-# Parameteters better tuned to match the branch preference trajectory over time
+# Parameters better tuned to match the branch preference trajectory over time
 # in Dussutor's Experiment 4, "dynamic environment".
 # The ratio map is a function of the distance to the midline fbr1 = fbr2
 # and also the distance to the origin fbr1 = fbr2 = 0.
@@ -464,7 +453,7 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
 def mapGetRatio_Exp4(fbr1, fbr2):
     dist_to_mid_2 = distToMid(fbr1, fbr2)
     dist_to_mid_ratio_factor = fracFromDistToMid_Exp4(dist_to_mid_2)
-    dist_to_orig = pow(pow(fbr1, 2) + pow((fbr2), 2), .5)
+    dist_to_orig = pow(pow(fbr1, 2) + pow(fbr2, 2), .5)
     #parmeters from Experiment 2    
     #dist_to_orig_ratio_factor = .6 + .4 * 1 / (1 + math.exp(-.8 * (dist_to_orig-8)))  #ch1
     #params that better fit Experiment 4
@@ -491,7 +480,6 @@ def amplifySignal_Exp4(x):
     return val
 
 
-
 # Top level function.
 # This simulates the condition of Fig. 10
 # Food appears at the left branch for gl_trial_duration (45 minutes),
@@ -504,7 +492,6 @@ def simulateDynamic():
     ph2 = 0    
     (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, True, False, ratio_ar)
     (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, False, True, ratio_ar)
-    (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, True, False, ratio_ar)
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.plot(ratio_ar, color="r")    

@@ -1,63 +1,63 @@
 
-#pheromones3.py is for testing alternative hypotheses to the two-pheromnes
-#claim put forth in:
-#"The role of multiple pheromones in food recruitment by ants"
-#A. Dussutour, S. C. Nicolis, G. Shephard, M. Beekman, and D. J. T. Sumpter
-#J Exp Biol. 2009;212: 2337–2348. doi:10.1242/jeb.029827
+# pheromones3.py is for testing alternative hypotheses to the two-pheromone
+# claim put forth in:
+# "The role of multiple pheromones in food recruitment by ants"
+# A. Dussutour, S. C. Nicolis, G. Shephard, M. Beekman, and D. J. T. Sumpter
+# J Exp Biol. 2009;212: 2337–2348. doi:10.1242/jeb.029827
 
-#pheromones3.py picks up from pheromones2.py in these ways:
-#-bundle parameters into a separate data structure called the parameter_bundle.
-#-quantitative least-sequares score for quality of model fit to data
-#-bring in data from Dussutour Exp 4 to score fit quantitatively
-#-use scipy to optimize parameters for Exp 1&2, for Exp 4, and for Exps 1&2
-#and Exp 4 jointly.
-#2022/05/30-2022/06/02 -ES
+# pheromones3.py picks up from pheromones2.py in these ways:
+# -bundle parameters into a separate data structure called the parameter_bundle.
+# -quantitative least-squares score for quality of model fit to data
+# -bring in data from Dussutour Exp 4 to score fit quantitatively
+# -use scipy to optimize parameters for Exp 1&2, for Exp 4, and for Exps 1&2
+# and Exp 4 jointly.
+# 2022/05/30-2022/06/02 -ES
 
-#Let us  assume ants put down the same kind of pheromone whether exploring or
-#exploiting / gathering.  But they put down more when exploiting, to leave a
-#stronger trail for where to go.  We'll assume that pheromone decays exponentially
-#with time.
+# Let us  assume ants put down the same kind of pheromone whether exploring or
+# exploiting / gathering.  But they put down more when exploiting, to leave a
+# stronger trail for where to go.  We'll assume that pheromone decays exponentially
+# with time.
 #
-#There are two experimental conditions, the E+F vs E condition, and the E+F vs N condition.
-#The E+F branch has pheromone after the ants have both explored and exploited.
-#The E branch has pheromone after the ants have only explored, but not exploited.
-#The N branch has no pheromone.
+# There are two experimental conditions, the E+F vs E condition, and the E+F vs N condition.
+# The E+F branch has pheromone after the ants have both explored and exploited.
+# The E branch has pheromone after the ants have only explored, but not exploited.
+# The N branch has no pheromone.
 #
-#Our hypothesis is that the E+F branch leaves a lot of pheromone, say, 10, and
-#the E branch leaves a small but significant amount of pheromone, say, 1.
-#So exploiting leaves 10 times as much pheromone as just exploring.
+# Our hypothesis is that the E+F branch leaves a lot of pheromone, say, 10, and
+# the E branch leaves a small but significant amount of pheromone, say, 1.
+# So exploiting leaves 10 times as much pheromone as just exploring.
 #
-#When there are good amounts of pheromone, then the measurement of
-#which path has more pheromone is clear.  Preferably choose the path with more.
-#When there is skimpy amount of pheromone, then hedge bets by allocating
-#traversals to both paths.
+# When there are good amounts of pheromone, then the measurement of
+# which path has more pheromone is clear.  Preferably choose the path with more.
+# When there is skimpy amount of pheromone, then hedge bets by allocating
+# traversals to both paths.
 #
-#We decompose the computation into two stages, signal amplification, and
-#path preference.
+# We decompose the computation into two stages, signal amplification, and
+# path preference.
 #
-#This file contains two top level functions that produce branch preference
-#curves.  One function is for Dussutour Experiments 1 & 2, and another uses
-#the same model to simulate Dussutour Experiment 4, "dynamic environment."
+# This file contains two top level functions that produce branch preference
+# curves.  One function is for Dussutour Experiments 1 & 2, and another uses
+# the same model to simulate Dussutour Experiment 4, "dynamic environment."
 #
 
 
 ############################################################
 #
-#How to run:
+# How to run:
 #
 
-#This runs in Python 3
+# This runs in Python 3
 
-#>>> import pheromones3 as ph
+# >>> import pheromones3 as ph
 
-#Plot fraction of E+F branch as a function of time using the lookup table data
-#obtained from Fig. 2.   This is not a parametric model, but it is a preliminary
-#test showing that branch preference can be indexed by a single pheromone amount
-#parameter.
-#>>> ph.runExp12_LookupModel()
+# Plot fraction of E+F branch as a function of time using the lookup table data
+# obtained from Fig. 2.   This is not a parametric model, but it is a preliminary
+# test showing that branch preference can be indexed by a single pheromone amount
+# parameter.
+# >>> ph.runExp12_LookupModel()
 
 
-#Plot the time course of hypothesized physical pheromone, amplifed pheromone
+#Plot the time course of hypothesized physical pheromone, amplified pheromone
 #measurement, and branch preference, based on the amplification + sigmoid
 #product analytical model.
 #>>> ph.runExp12_AnalyticalModel(<parameter-bundle>)
@@ -103,7 +103,6 @@ import numpy as np
 from scipy.optimize import Bounds
 
 
-
 ############################################################
 #
 #Empirical data
@@ -135,30 +134,27 @@ gl_frac_table_e = [.94, .91, .83, .75, .68, .62, .56, .51, .52, .49,
 # The conversion assumes an exponential decay in the amount of pheromone.
 
 
-
-
-#This data for Dussuotour etal Experiment 4 is read off from their Figure 10.
+#This data for Dussutour et al. Experiment 4 is read off from their Figure 10.
 #The first entry is for t=0, imputed to be the first plotted entry which is t = 1.
 #                       0    1    2    3    4    5    6    7    8    9
 #                      10   11   12   13   14   15   16   17   18   19
 #                      20   21   22   23   24   25   26   27   28   29
 
-gl_frac_table_exp4 = [.57, .57, .60, .56, .52, .54, .68, .62, .68, .72,   #0-9
-                      .69, .70, .70, .75, .76, .82, .81, .87, .84, .83,   #10-19
-                      .85, .85, .89, .88, .89, .91, .88, .92, .89, .91,   #20-29
-                      .92, .91, .89, .90, .93, .92, .91, .91, .93, .92,   #30-39
-                      .93, .90, .92, .91, .94, .94, .89, .88, .84, .80,   #40-49
-                      .78, .74, .74, .74, .69, .67, .64, .63, .57, .57,   #50-59
-                      .49, .44, .40, .45, .40, .46, .40, .40, .37, .32,   #60-69
-                      .30, .31, .29, .29, .27, .28, .29, .24, .24, .25,   #70-79
-                      .24, .22, .22, .23, .24, .23, .20, .18, .20, .20,   #80-89
-                      .19, .28, .28, .33, .36, .52, .50, .48, .49, .54,   #90-99
-                      .57, .57, .58, .65, .67, .71, .72, .70, .73, .75,   #100-109
-                      .76, .77, .74, .76, .78, .77, .78, .82, .84, .83,   #110-119
-                      .82, .83, .85, .84, .85, .86, .86, .85, .85, .86,   #120-129
-                      .85]                                                #130
+gl_frac_table_exp4 = [.57, .57, .60, .56, .52, .54, .68, .62, .68, .72,   # 0-9
+                      .69, .70, .70, .75, .76, .82, .81, .87, .84, .83,   # 10-19
+                      .85, .85, .89, .88, .89, .91, .88, .92, .89, .91,   # 20-29
+                      .92, .91, .89, .90, .93, .92, .91, .91, .93, .92,   # 30-39
+                      .93, .90, .92, .91, .94, .94, .89, .88, .84, .80,   # 40-49
+                      .78, .74, .74, .74, .69, .67, .64, .63, .57, .57,   # 50-59
+                      .49, .44, .40, .45, .40, .46, .40, .40, .37, .32,   # 60-69
+                      .30, .31, .29, .29, .27, .28, .29, .24, .24, .25,   # 70-79
+                      .24, .22, .22, .23, .24, .23, .20, .18, .20, .20,   # 80-89
+                      .19, .28, .28, .33, .36, .52, .50, .48, .49, .54,   # 90-99
+                      .57, .57, .58, .65, .67, .71, .72, .70, .73, .75,   # 100-109
+                      .76, .77, .74, .76, .78, .77, .78, .82, .84, .83,   # 110-119
+                      .82, .83, .85, .84, .85, .86, .86, .85, .85, .86,   # 120-129
+                      .85]                                                # 130
                       
-
 
 #
 #
@@ -173,11 +169,10 @@ gl_frac_table_exp4 = [.57, .57, .60, .56, .52, .54, .68, .62, .68, .72,   #0-9
 #
 
 
-
-#gl_min_noise_level = .01      
-gl_min_noise_level = .001     #useful for optimizing for Exp4 alone
-#gl_min_noise_level = .02     #useful for optimizing for Exp12 alone
-#gl_min_noise_level = .05
+# gl_min_noise_level = .01
+gl_min_noise_level = .001     # useful for optimizing for Exp4 alone
+# gl_min_noise_level = .02     # useful for optimizing for Exp12 alone
+# gl_min_noise_level = .05
 
 gl_max_noise_level = .05
 
@@ -190,7 +185,6 @@ gl_min_deposit_rate_exploit = .001   # pheromone per ant deposited
 
 #gl_min_deposit_rate_explore = .001   # pheromone per ant deposited, combined Exp12 and Exp4
 gl_min_deposit_rate_explore = .1      # pheromone per ant deposited, Exp4 alone
-
 
 
 # c1 is the assumed amount of pheromone on the E+F branch at the start
@@ -215,11 +209,10 @@ gl_decay = -.069
 # starting from c1 = 10.
 
 
-
 ####################
 #
 #Older method for setting parameters by global variables
-#These parameters are pretty much not used any more, but are kept for reference
+#These parameters are pretty much not used anymore, but are kept for reference
 #and just in case.
 #
 
@@ -251,7 +244,6 @@ gl_deposit_rate_explore = .0011   # pheromone per ant deposited, Exp. 4
 ####################
 
 
-
 #
 #
 ############################################################ loose parameters
@@ -281,7 +273,7 @@ gl_parameter_index_dict = {'c1': 0,
 gl_initial_parameter_bundle = {'c1': 10, 
                                'c2': 1,  
                                'amp_A': 5.5,
-                               'noise_level': .02,  #amp_B
+                               'noise_level': .02,  # amp_B
                                'amp_C': .25,
                                's_m': 4.0,
                                'd_0_m': 2.0,
@@ -294,10 +286,10 @@ gl_initial_parameter_bundle = {'c1': 10,
 
 
 #These are parameters found by running findOptimalParameters_Exp12_AnalyticalModel()
-gl_parameter_bundle_opt_12_old =  {'c1': 10.17262, 
+gl_parameter_bundle_opt_12_old = {'c1': 10.17262,
                                    'c2': .345537,
                                    'amp_A': 6.49917,
-                                   'noise_level': .34503,  #amp_B
+                                   'noise_level': .34503,  # amp_B
                                    'amp_C': .14277,
                                    's_m': 6.85542,
                                    'd_0_m': 4.2066,
@@ -309,15 +301,13 @@ gl_parameter_bundle_opt_12_old =  {'c1': 10.17262,
                                    'rate_explore': .001}
 
 
-
-#These are parameters found by running findOptimalParameters_Exp12_AnalyticalModel()
-#[1.01222934e+01, 9.04185319e-02, 6.33911476e+00, 2.64120835e-02, 1.61602064e-01,
+#These are parameters found by running findOptimalParameters_Exp12_AnalyticalModel()#[1.01222934e+01, 9.04185319e-02, 6.33911476e+00, 2.64120835e-02, 1.61602064e-01,
 # 5.35132122e+00, 2.80428088e+00, 7.92144094e+00, 4.95130652e-01, 1.22565760e+00,
 # 7.93805067e+00, 1.00000000e-02, 1.00000000e-03])
-gl_parameter_bundle_opt_12 =  {'c1': 10.1,
+gl_parameter_bundle_opt_12 = {'c1': 10.1,
                                'c2': .09,
                                'amp_A': 6.34,
-                               'noise_level': .026,  #amp_B
+                               'noise_level': .026,  # amp_B
                                'amp_C': .162,
                                's_m': 5.35,
                                'd_0_m': 2.80,
@@ -329,16 +319,13 @@ gl_parameter_bundle_opt_12 =  {'c1': 10.1,
                                'rate_explore': .001}
 
 
-
-
-#These are parameters found by running findOptimalParameters_Exp4()
-#[1.01726377e+01, 1.00000000e+00, 1.84348473e-01, 1.42625873e-03, 5.03239639e-01,
+# These are parameters found by running findOptimalParameters_Exp4(#[1.01726377e+01, 1.00000000e+00, 1.84348473e-01, 1.42625873e-03, 5.03239639e-01,
 # 4.13522526e-01, 4.58478102e+00, 8.08150494e+00, 2.59647889e-01, 3.83122059e-01,
 # 9.20265683e+00, 1.22761106e+01, 2.03184883e-01]
-gl_parameter_bundle_opt_4 =  {'c1': 10.2,
+gl_parameter_bundle_opt_4 = {'c1': 10.2,
                                'c2': 1.0,
                                'amp_A': .18,
-                               'noise_level': .0014,  #amp_B
+                               'noise_level': .0014,  # amp_B
                                'amp_C': .5,
                                's_m': .41,
                                'd_0_m': 4.58,
@@ -350,19 +337,18 @@ gl_parameter_bundle_opt_4 =  {'c1': 10.2,
                                'rate_explore': .2}
 
 
-
 #These are approximate parameters found by running findOptimalParameters_Exp12_Exp4()
-#which jointly optimizes parameters for Dussutour etal Experiments 1&2 and Experiment 4.
+#which jointly optimizes parameters for Dussutour et al. Experiments 1&2 and Experiment 4.
 #This optimization includes a weighting of .35 on the exp4 term to even out the number
 #of time points considered. These parameters give slightly worse fits to each experiment,
 #but is a good compromise between them.
 
 #gl_pb124 = [1.00478542e+01, 1.84106087e+00, 5.29370919e+00, 1.00000000e-03, 2.35691334e-01, 2.84845387e+00, 1.11463818e+00, 8.00445445e+00, 5.27976461e-01, 1.14590164e+00, 7.84402340e+00, 6.33664430e-03, 1.13139877e-03]
 
-gl_parameter_bundle_opt_124 =  {'c1': 10.0478,
+gl_parameter_bundle_opt_124 = {'c1': 10.0478,
                                 'c2': 1.8411,
                                 'amp_A': 5.2937,
-                                'noise_level': .001,  #amp_B
+                                'noise_level': .001,  # amp_B
                                 'amp_C': .23569,
                                 's_m': 2.84845,
                                 'd_0_m': 1.114638,
@@ -373,10 +359,10 @@ gl_parameter_bundle_opt_124 =  {'c1': 10.0478,
                                 'rate_exploit': .0063366,
                                 'rate_explore': .001313}
 
-gl_parameter_bundle_opt_124_approx =  {'c1': 10.0,
+gl_parameter_bundle_opt_124_approx = {'c1': 10.0,
                                        'c2': 1.84,
                                        'amp_A': 5.29,
-                                       'noise_level': .001,  #amp_B
+                                       'noise_level': .001,  # amp_B
                                        'amp_C': .236,
                                        's_m': 2.85,
                                        'd_0_m': 1.11,
@@ -398,8 +384,6 @@ gl_parameter_bundle_opt_124_approx =  {'c1': 10.0,
 #gl_pb124_approx2 = [10.0, 1.84, 5.29, 0.001, 0.236, 2.85, 1.11, 8.0, 0.53, 1.15, 7.84, 0.0063, 0.0011] 
 
 
-
-
 gl_param_lower_bounds = [.001, gl_min_c2,
                          .001, gl_min_noise_level, gl_min_amp_C,
                          .001, .001, .001, .001, .001, .001, 
@@ -411,7 +395,6 @@ gl_param_upper_bounds = [np.inf, np.inf,
                          np.inf, gl_max_noise_level, 40.0,
                          np.inf, np.inf, np.inf, np.inf, np.inf, np.inf,
                          np.inf, np.inf]
-
 
 
 gl_parameter_bounds = Bounds(gl_param_lower_bounds, gl_param_upper_bounds)
@@ -470,7 +453,7 @@ def printParameterBundle(parameter_bundle):
         parameter_bundle_dict = parameter_bundle
     print('c1: ' + str(parameter_bundle_dict.get('c1')) + '  c2: ' + str(parameter_bundle_dict.get('c2')))
     print('amp_A: ' + str(parameter_bundle_dict.get('amp_A')) + '  noise_level: ' + str(parameter_bundle_dict.get('noise_level')) + '  amp_C: ' + str(parameter_bundle_dict.get('amp_C')))
-    print('s_m: ' + str(parameter_bundle_dict.get('s_m')) + '  d_0_m: ' + str(parameter_bundle_dict.get('d_0_m')) + '  m_z: ' + str(parameter_bundle_dict.get('m_z')) + '  s_0: ' + str(parameter_bundle_dict.get('s_0')) +'  s_r: ' + str(parameter_bundle_dict.get('s_r')) +'  d_0_r: ' + str(parameter_bundle_dict.get('s_m')) +'  s_m: ' + str(parameter_bundle_dict.get('d_0_r')) + ' rate_exploit: ' + str(parameter_bundle_dict.get('rate_exploit')) + ' rate_explore: ' + str(parameter_bundle_dict.get('rate_explore')))
+    print('s_m: ' + str(parameter_bundle_dict.get('s_m')) + '  d_0_m: ' + str(parameter_bundle_dict.get('d_0_m')) + '  m_z: ' + str(parameter_bundle_dict.get('m_z')) + '  s_0: ' + str(parameter_bundle_dict.get('s_0')) + '  s_r: ' + str(parameter_bundle_dict.get('s_r')) + '  d_0_r: ' + str(parameter_bundle_dict.get('s_m')) + '  s_m: ' + str(parameter_bundle_dict.get('d_0_r')) + ' rate_exploit: ' + str(parameter_bundle_dict.get('rate_exploit')) + ' rate_explore: ' + str(parameter_bundle_dict.get('rate_explore')))
 
 
 #
@@ -587,9 +570,9 @@ def lookupFraction(ph1, ph2, lut, print_p=False):
 
 
 # Plot Lookup table of preference fraction vs  measured pheromone on 2 branches
-# The measured pheremone is the exponentially decreasing amount of pheromone,
+# The measured pheromone is the exponentially decreasing amount of pheromone,
 # but mapped through the measurement function amplifySignal()
-# which nonlinearly amplifies small amounts.
+# which non-linearly amplifies small amounts.
 # Preference fraction is the size of the circle.
 def plotLUT(max_range=10):
     global gl_lut
@@ -622,25 +605,22 @@ def plotLUT(max_range=10):
 ############################################################ lookup table
 
 
-
 ############################################################
 #
 #Analytical model
 #
     
     
-
-#power law amplification of raw pheromone x
-#amp_A is scaling term
-#amp_B is noise level offset from raw pheromone
-#amp_C is power
+# power law amplification of raw pheromone x
+# amp_A is scaling term
+# amp_B is noise level offset from raw pheromone
+# amp_C is power
 def amplifySignal(x, amp_A = gl_amp_A, amp_B = gl_amp_B, amp_C = gl_amp_C):
     amp_signal = amp_A*pow((x - amp_B), amp_C)
     #print('x: ' + str(x) + ' amp_A: ' + str(amp_A) + ' amp_B: ' + str(amp_B) + ' amp_C: ' + str(amp_C) + ' amp_signal: ' + str(amp_signal))
     if math.isnan(amp_signal):
         print('problem')
         print('x: ' + str(x) + ' amp_A: ' + str(amp_A) + ' amp_B: ' + str(amp_B) + ' amp_C: ' + str(amp_C) + ' amp_signal: ' + str(amp_signal))
-        aa = 23/0
     return amp_signal
 
     
@@ -653,7 +633,6 @@ def amplifySignal(x, amp_A = gl_amp_A, amp_B = gl_amp_B, amp_C = gl_amp_C):
 #    return val
 
 
-
 # Returns distance to the midline of equal pheromone amounts.
 # As everywhere, units are arbitrary pheromone amounts, assuming the
 # E+F branch starts with pheromone amount 10.
@@ -662,7 +641,6 @@ def distToMid(xpr, ypr):
     ym = xm
     dist = pow(pow(xpr-xm, 2) + pow((ypr-ym), 2), .5)
     return dist
-
 
 
 # This squashing function creates a band of equal preference near the midline,
@@ -677,7 +655,6 @@ def fracFromDistToMid(dist, s_m = gl_s_m, d_0_m = gl_d_0_m, m_z = gl_m_z):
     return frac
 
 
-
 #fbr1 and fbr2 are the amplified pheromone amounts on branch 1 branch 2 respectively.
 # The ratio map is a function of the distance to the midline fbr1 = fbr2
 # and also the distance to the origin fbr1 = fbr2 = 0.
@@ -689,7 +666,7 @@ def mapGetRatio(fbr1, fbr2, s_m = gl_s_m, d_0_m = gl_d_0_m, m_z = gl_m_z,
                 
     dist_to_mid_2 = distToMid(fbr1, fbr2)
     dist_to_mid_ratio_factor = fracFromDistToMid(dist_to_mid_2, s_m, d_0_m, m_z)
-    dist_to_orig = pow(pow(fbr1, 2) + pow((fbr2), 2), .5)
+    dist_to_orig = pow(pow(fbr1, 2) + pow(fbr2, 2), .5)
     #dist_to_orig_ratio_factor = .6 + .4 * 1 / (1 + math.exp(-.8 * (dist_to_orig-8)))
     exponent = -s_r * (dist_to_orig-d_0_r)
     #if abs(exponent) > 100:
@@ -783,7 +760,6 @@ def runExp12_AnalyticalModel(parameter_bundle = gl_initial_parameter_bundle):
     plt.show()
 
 
-
 #parameter_bundle is a list of parameters indexed by gl_parameter_index_dict
 #def exp12ScoreFunction(parameter_bundle, arg0):
 def exp12ScoreFunction(parameter_bundle):    
@@ -820,8 +796,8 @@ def exp12ScoreFunction(parameter_bundle):
     sum_sq_error = 0
     for m1 in range(1, 25):
         m5 = m1*5
-        br1 = c1 * math.exp(decay_rate * m5) + noise_level  #exponential decaying pheromone on branch 1
-        br2a = c2 * math.exp(decay_rate * m5) + noise_level #exponential decaying pheromone on branch 2
+        br1 = c1 * math.exp(decay_rate * m5) + noise_level  # exponential decaying pheromone on branch 1
+        br2a = c2 * math.exp(decay_rate * m5) + noise_level  # exponential decaying pheromone on branch 2
         br2b = noise_level
         fbr1 = amplifySignal(br1, amp_A, noise_level, amp_C)
         fbr2a = amplifySignal(br2a, amp_A, noise_level, amp_C)
@@ -857,7 +833,6 @@ def findOptimalParameters_Exp12_AnalyticalModel(initial_parameter_bundle = gl_in
 ##################################
 
     
-    
 ##################################
 #
 # Simulating Experiment 4, "dynamic environment" alternating food placement.
@@ -870,13 +845,11 @@ def findOptimalParameters_Exp12_AnalyticalModel(initial_parameter_bundle = gl_in
 # find the right functional form and parameters to fit both figures well and
 # predict other experimental results about ant behavior in this kind of setup.
 
-gl_ants_per_m = 50     #based on Dussutour paper
-#gl_ants_per_m = 30    #better fit to Exp. 4 data fit by hand
+gl_ants_per_m = 50     # based on Dussutour paper
+#gl_ants_per_m = 30    # better fit to Exp. 4 data fit by hand
 
 
-
-gl_trial_duration = 45   #Exp 4, minutes per branch getting food 
-
+gl_trial_duration = 45   # Exp 4, minutes per branch getting food
 # To simulate their experiment of placing food at one of the platforms at
 # the end of a branch and watching activity ramp up and down, we need to
 # model pheromone deposition as a function of whether the ant is exploring
@@ -886,11 +859,12 @@ gl_trial_duration = 45   #Exp 4, minutes per branch getting food
 # f1 & f2 are whether food is present at the left or right branch, respectively
 
 
-#Set to True to use the parameters from Experiments 1 and 2 for the
-#simulation of Experiment 4.
+# Set to True to use the parameters from Experiments 1 and 2 for the
+# simulation of Experiment 4.
 gl_exp_2_parameters_p = False
 
-#call with directive = 'exp2' or 'exp4'
+
+# call with directive = 'exp2' or 'exp4'
 def setDynamicSimulationParameters(directive = None):
     if directive != 'exp2' and directive != 'exp4':
         print('To set Exp4 simulation parameters from Dussutour Exp. 1&2 data: >>> ph.setExp4Parameters(\'exp2\').\n To set Exp4 simulation parameters from Dussutour Exp. 4 data: >>> ph.setExp4Parameters(\'exp4\').')
@@ -899,10 +873,10 @@ def setDynamicSimulationParameters(directive = None):
     global gl_ants_per_m
     if directive == 'exp2':
         gl_exp_2_parameters_p = True
-        gl_ants_per_m = 50    #as described in the Dussutour paper
+        gl_ants_per_m = 50    # as described in the Dussutour paper
     elif directive == 'exp4':
         gl_exp_2_parameters_p = False
-        gl_ants_per_m = 30    #a better fit to the Exp. 4 data
+        gl_ants_per_m = 30    # a better fit to the Exp. 4 data
     else:
         print('unrecognized directive: ' + str(directive))
 
@@ -915,7 +889,7 @@ def setDynamicSimulationParameters(directive = None):
 #pheromone at a rate, deposit_rate_explore.
 #
 #This appends ph1/ph2 ratios to ratio_ar.
-#Returns two two values, ph1 and ph2, which are pheromone concentrations on
+#Returns two values, ph1 and ph2, which are pheromone concentrations on
 #branch 1 and 2 respectively after gl_trial_duration minutes.
 def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None,
                             parameter_bundle = gl_parameter_bundle_opt_12):
@@ -982,8 +956,7 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None,
               
         ph1 = max(ph1_next, noise_level)
         ph2 = max(ph2_next, noise_level)
-    return(ph1, ph2)
-
+    return ph1, ph2
 
 
 # Top level function.
@@ -998,7 +971,6 @@ def simulateDynamic(parameter_bundle = gl_parameter_bundle_opt_12, plot_p=True):
     ph2 = 0 
     (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, True, False, ratio_ar, parameter_bundle)
     (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, False, True, ratio_ar, parameter_bundle)
-    (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, True, False, ratio_ar, parameter_bundle)
     if plot_p:
         fig = plt.figure()
         ax1 = fig.add_subplot(111)
@@ -1008,15 +980,13 @@ def simulateDynamic(parameter_bundle = gl_parameter_bundle_opt_12, plot_p=True):
     return ratio_ar
 
 
-
-#simulate just having pheromone present on branch 1 for 45 minutes, then absent.
+# simulate just having pheromone present on branch 1 for 45 minutes, then absent.
 def simulateOnOff():
     duration = gl_trial_duration
     ratio_ar = []
     ph1 = 0
     ph2 = 0
     (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, True, False, ratio_ar)
-    (ph1, ph2) = simulateYJunctionTravel(ph1, ph2, False, False, ratio_ar)
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.plot(ratio_ar)
@@ -1026,7 +996,6 @@ def simulateOnOff():
 
 #gl_optimization_method = 'CG'
 gl_optimization_method = 'L-BFGS-B'
-
 
 
 #run scipy.optimize to find parameters that best fit predicted branch preference curves
@@ -1046,8 +1015,8 @@ def exp4ScoreFunction(parameter_bundle):
     print('exp4ScoreFunction parameters: ' + str(parameter_bundle))
     ratio_ar = simulateDynamic(parameter_bundle, False)
     sum_sq_error = 0
-    frac_table = gl_frac_table_exp4  #array of observed preference for branch 1 vs branch 2
-    #for Brach1/Branch2/Branch2 placement of food for 45 minute phases
+    frac_table = gl_frac_table_exp4  # array of observed preference for branch 1 vs branch 2
+    # for Branch1/Branch2/Branch2 placement of food for 45 minute phases
     for m in range(len(frac_table)):
         error = ratio_ar[m] - frac_table[m]
         sum_sq_error += error*error
@@ -1085,30 +1054,18 @@ def exp12_exp4ScoreFunction(parameter_bundle):
     return total_sse
 
 
-  
-#
-#
-############################################################
-#
-#
 ################################################################################
-
-
-
-
-
 ################################################################################
 #
 #Archives
 #
-
+################################################################################
+################################################################################
     
 
 def runExp12_AnalyticalModel_orig(c1=10, c2=1):
     c1 = c1 - gl_noise_level
     c2 = c2 - gl_noise_level
-    decay_time = 90
-
     decay_rate = figureDecayRate(c1, gl_decay_time, gl_noise_level)
     duration = 120
     fig = plt.figure()
@@ -1150,17 +1107,15 @@ def runExp12_AnalyticalModel_orig(c1=10, c2=1):
     plt.show()
 
 
-    
-
-#Simulate ant behavior for gl_ants_per_m ants per minute exploring a Y-maze.
-#The maze starts off with c1 and c2 levels of pheromone, respectively
-#f1 and f2 are flags for whether each branch has food.
-#If a branch has food, then ants will deposit pheromone at a rate,
-#deposit_rate_exploit.    If a branch does not have food, then ants will deposit
-#pheromone at a rate, deposit_rate_explore
-#Returns two two values, ph1 and ph2, which are pheromone concentrations on
-#branch 1 and 2 respectively after gl_trial_duration minutes.
-#orig version
+# Simulate ant behavior for gl_ants_per_m ants per minute exploring a Y-maze.
+# The maze starts off with c1 and c2 levels of pheromone, respectively
+# f1 and f2 are flags for whether each branch has food.
+# If a branch has food, then ants will deposit pheromone at a rate,
+# deposit_rate_exploit.    If a branch does not have food, then ants will deposit
+# pheromone at a rate, deposit_rate_explore
+# Returns two values, ph1 and ph2, which are pheromone concentrations on
+# branch 1 and 2 respectively after gl_trial_duration minutes.
+# orig version
 def simulateYJunctionTravel_orig(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
     duration = gl_trial_duration
     ph1 = max(c1, gl_noise_level)
@@ -1170,7 +1125,7 @@ def simulateYJunctionTravel_orig(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
         ratio_ar = []
     for m in range(duration):   # duration in minutes
 
-        #choose whether to use paremeters chosen to fit Dussutour Experiments 1 and 2,
+        #choose whether to use parameters chosen to fit Dussutour Experiments 1 and 2,
         #or else use parameters that better fit their Experiment 4.
         if gl_exp_2_parameters_p:
             fph1 = amplifySignal(ph1)
@@ -1202,10 +1157,10 @@ def simulateYJunctionTravel_orig(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
               
         ph1 = max(ph1_next, gl_noise_level)
         ph2 = max(ph2_next, gl_noise_level)
-    return(ph1, ph2)
+    return ph1, ph2
 
 
-# Parameteters better tuned to match the branch preference trajectory over time
+# Parameters better tuned to match the branch preference trajectory over time
 # in Dussutor's Experiment 4, "dynamic environment".
 # The ratio map is a function of the distance to the midline fbr1 = fbr2
 # and also the distance to the origin fbr1 = fbr2 = 0.
@@ -1213,11 +1168,11 @@ def simulateYJunctionTravel_orig(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
 # Above this radius, the ratio can go up to 1.
 # Below this radius, the ratio is limited to about 0.7
 # Also, the channel width of the distance to midline is slightly different.
-#should be obsolete
+# should be obsolete
 def mapGetRatio_Exp4(fbr1, fbr2):
     dist_to_mid_2 = distToMid(fbr1, fbr2)
     dist_to_mid_ratio_factor = fracFromDistToMid_Exp4(dist_to_mid_2)
-    dist_to_orig = pow(pow(fbr1, 2) + pow((fbr2), 2), .5)
+    dist_to_orig = pow(pow(fbr1, 2) + pow(fbr2, 2), .5)
     #parmeters from Experiment 2    
     #dist_to_orig_ratio_factor = .6 + .4 * 1 / (1 + math.exp(-.8 * (dist_to_orig-8)))  #ch1
     #params that better fit Experiment 4
@@ -1228,7 +1183,7 @@ def mapGetRatio_Exp4(fbr1, fbr2):
     return total_ratio
 
 
-#with amplification
+# with amplification
 def fracFromDistToMid_Exp4(dist):
     #parmeters from Experiment 2
     #frac = 1.0 / (1 + math.exp(-4*(dist-2))) - 1 / (1 + math.exp(8))    # ch1
@@ -1244,6 +1199,6 @@ def amplifySignal_Exp4(x):
     return val
 
 
-#def fracFromDistToMid(dist):
+# def fracFromDistToMid(dist):
 #    frac = 1.0 / (1 + math.exp(-4*(dist-2))) - 1 / (1 + math.exp(8))    # ch1
 #    return frac

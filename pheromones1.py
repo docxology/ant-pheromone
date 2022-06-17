@@ -35,6 +35,8 @@ gl_decay = -.069
 # starting from c1 = 10.
 
 gl_noise_level = .02
+
+
 # minimum signal level, initial estimate of 0.02
 
 
@@ -45,7 +47,7 @@ def setupTable(c1=10, c2=1):
     for i in range(0, 19):
         frac_e = gl_frac_table_e[i]
         frac_n = gl_frac_table_n[i]
-        t = (i+1)*5  # In Fig. 2, measurements start after 5 minutes
+        t = (i + 1) * 5  # In Fig. 2, measurements start after 5 minutes
         ph1 = c1 * math.exp(gl_decay * t) + gl_noise_level
         ph2 = c2 * math.exp(gl_decay * t) + gl_noise_level
         print('t: ' + str(t) + ' frac_e: ' + str(frac_e) + ' frac_n: '
@@ -65,7 +67,7 @@ def setTable():
 
 try:
     gl_lut
-except:              # see E722, may be a better way than a bare except
+except:  # see E722, may be a better way than a bare except
     gl_lut = setupTable()
 
 
@@ -92,14 +94,14 @@ def testExp2(c1=10, c2=1):
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    br1_ar = []   # exponential decaying pheromone on branch 1
+    br1_ar = []  # exponential decaying pheromone on branch 1
     br2a_ar = []  # exponential decaying pheromone on branch 2
     # fbr1_ar = [] # assigned but never used.
     # fbr2a_ar = [] # assigned but never used.
     # fbr2b_ar = [] # assigned but never used.
     ratio2a_ar = []
     ratio2b_ar = []
-    for m in range(duration):   # duration is in minutes
+    for m in range(duration):  # duration is in minutes
         br1 = c1 * math.exp(gl_decay * m) + gl_noise_level
         br2a = c2 * math.exp(gl_decay * m) + gl_noise_level
         br2b = gl_noise_level
@@ -137,9 +139,9 @@ def lookupFraction(ph1, ph2, lut, print_p=False):
 
 
 # Plot Lookup table of preference fraction vs  measured pheromone on 2 branches
-# The measured pheremone is the exponentially decreasing amount of pheromone,
+# The measured pheromone is the exponentially decreasing amount of pheromone,
 # but mapped through the measurement function amplifySignal()
-# which nonlinearly amplifies small amounts.
+# which non=linearly amplifies small amounts.
 # Preference fraction is the size of the circle.
 def plotLUT(max_range=10):
     global gl_lut
@@ -151,7 +153,7 @@ def plotLUT(max_range=10):
     val_ar = []
     for item in gl_lut:
         area = item[2] - .4
-        val_ar.append(area*area*400)
+        val_ar.append(area * area * 400)
         # print(str(area))
         x = item[0]
         y = item[1]
@@ -172,7 +174,7 @@ def plotLUT(max_range=10):
 # at about the same diagonal for E+F vs. E condition and E+F vs. N condition.
 def amplifySignal(x):
     xpr = x - gl_noise_level
-    val = 5.5*pow(xpr, .25)
+    val = 5.5 * pow(xpr, .25)
     return val
 
 
@@ -180,9 +182,9 @@ def amplifySignal(x):
 # As everywhere, units are arbitrary pheromone amounts, assuming the
 # E+F branch starts with pheromone amount 10.
 def distToMid(xpr, ypr):
-    xm = (xpr + ypr)/2
+    xm = (xpr + ypr) / 2
     ym = xm
-    dist = pow(pow(xpr-xm, 2) + pow((ypr-ym), 2), .5)
+    dist = pow(pow(xpr - xm, 2) + pow((ypr - ym), 2), .5)
     return dist
 
 
@@ -191,7 +193,7 @@ def distToMid(xpr, ypr):
 # transitioning to a preference for one branch or the other at a distance of
 # about 2 from the midline.
 def fracFromDistToMid(dist):
-    frac = 1.0 / (1 + math.exp(-4*(dist-2))) - 1 / (1 + math.exp(8))    # ch1
+    frac = 1.0 / (1 + math.exp(-4 * (dist - 2))) - 1 / (1 + math.exp(8))  # ch1
     return frac
 
 
@@ -203,8 +205,8 @@ def fracFromDistToMid(dist):
 def mapGetRatio(fbr1, fbr2):
     dist_to_mid_2 = distToMid(fbr1, fbr2)
     dist_to_mid_ratio_factor = fracFromDistToMid(dist_to_mid_2)
-    dist_to_orig = pow(pow(fbr1, 2) + pow((fbr2), 2), .5)
-    dist_to_orig_ratio_factor = .6 + .4 * 1 / (1 + math.exp(-.8 * (dist_to_orig-8)))
+    dist_to_orig = pow(pow(fbr1, 2) + pow(fbr2, 2), .5)
+    dist_to_orig_ratio_factor = .6 + .4 * 1 / (1 + math.exp(-.8 * (dist_to_orig - 8)))
     total_ratio = (dist_to_mid_ratio_factor * dist_to_orig_ratio_factor) / 2 + .5
     if fbr2 > fbr1:
         total_ratio = 1.0 - total_ratio
@@ -232,7 +234,7 @@ def testExp4(c1=10, c2=1):
     fig = plt.figure()
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    br1_ar = []   # exponential decaying pheromone on branch 1
+    br1_ar = []  # exponential decaying pheromone on branch 1
     br2a_ar = []  # exponential decaying pheromone on branch 2
     fbr1_ar = []
     fbr2a_ar = []
@@ -241,7 +243,7 @@ def testExp4(c1=10, c2=1):
     ratio2b_ar = []
     # dist_a_ar = [] # assigned but not used
     # dist_b_ar = [] # assigned but not used
-    for m in range(duration):   # duration in minutes
+    for m in range(duration):  # duration in minutes
         br1 = c1 * math.exp(gl_decay * m) + gl_noise_level
         br2a = c2 * math.exp(gl_decay * m) + gl_noise_level
         br2b = gl_noise_level
@@ -267,6 +269,7 @@ def testExp4(c1=10, c2=1):
     plt.xlim([0, duration])
     plt.show()
 
+
 ##################################
 
 # Simulating Experiment 4, "dynamic environment" alternating food placement.
@@ -281,9 +284,10 @@ def testExp4(c1=10, c2=1):
 
 # gl_ants_per_m = 50   #ch2
 gl_ants_per_m = 30
-gl_deposit_rate_exploit = .011    # pheromone per ant deposited
-gl_deposit_rate_explore = .0011   # pheromone per ant deposited
+gl_deposit_rate_exploit = .011  # pheromone per ant deposited
+gl_deposit_rate_explore = .0011  # pheromone per ant deposited
 gl_trial_duration = 45
+
 
 # To simulate their experiment of placing food at one of the platforms at
 # the end of a branch and watching activity ramp up and down, we need to
@@ -301,15 +305,15 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
     print(f1)
     if ratio_ar is None:
         ratio_ar = []
-    for m in range(duration):   # duration in minutes
+    for m in range(duration):  # duration in minutes
         frac_1 = mapGetRatio_Exp4(ph1, ph2)
         ratio_ar.append(frac_1)
         ants_1 = gl_ants_per_m * frac_1
         ants_2 = gl_ants_per_m * (1.0 - frac_1)
         # print('frac: ' + str(frac_1) + '  ants_1: ' + str(ants_1)
         # + ' ants_2: ' + str(ants_2))
-        ph1_next = ph1 * math.exp(gl_decay*1.2)
-        ph2_next = ph2 * math.exp(gl_decay*1.2)
+        ph1_next = ph1 * math.exp(gl_decay * 1.2)
+        ph2_next = ph2 * math.exp(gl_decay * 1.2)
         if f1 is True:
             ph1_next += ants_1 * gl_deposit_rate_exploit
         else:
@@ -321,7 +325,7 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
         # print('ph1_next: ' + str(ph1_next) + ' ph2_next: ' + str(ph2_next))
         ph1 = ph1_next
         ph2 = ph2_next
-    return(ph1, ph2)
+    return ph1, ph2
 
 
 # The ratio map is a function of the distance to the midline fbr1 = fbr2
@@ -334,8 +338,8 @@ def simulateYJunctionTravel(c1=0, c2=0, f1=False, f2=False, ratio_ar=None):
 def mapGetRatio_Exp4(fbr1, fbr2):
     dist_to_mid_2 = distToMid(fbr1, fbr2)
     dist_to_mid_ratio_factor = fracFromDistToMid_Exp4(dist_to_mid_2)
-    dist_to_orig = pow(pow(fbr1, 2) + pow((fbr2), 2), .5)
-    dist_to_orig_ratio_factor = .8 + .2 * 1 / (1 + math.exp(-.8 * (dist_to_orig-8)))
+    dist_to_orig = pow(pow(fbr1, 2) + pow(fbr2, 2), .5)
+    dist_to_orig_ratio_factor = .8 + .2 * 1 / (1 + math.exp(-.8 * (dist_to_orig - 8)))
     total_ratio = (dist_to_mid_ratio_factor * dist_to_orig_ratio_factor) / 2 + .5
     if fbr2 > fbr1:
         total_ratio = 1.0 - total_ratio
@@ -344,7 +348,7 @@ def mapGetRatio_Exp4(fbr1, fbr2):
 
 def fracFromDistToMid_Exp4(dist):
     # frac = 1.0 / (1 + math.exp(-4*(dist-1))) - 1 / (1 + math.exp(4))    # ch1
-    frac = 1 / (1 + math.exp(-3.5*(dist-.8))) - 1 / (1 + math.exp(2.8))  # ch1
+    frac = 1 / (1 + math.exp(-3.5 * (dist - .8))) - 1 / (1 + math.exp(2.8))  # ch1
     return frac
 
 
@@ -364,7 +368,7 @@ def simulateDynamic():
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.plot(ratio_ar)
-    plt.xlim([0, duration*3])
+    plt.xlim([0, duration * 3])
     plt.show()
 
 
@@ -378,5 +382,5 @@ def simulateOnOff():
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.plot(ratio_ar)
-    plt.xlim([0, duration*2])
+    plt.xlim([0, duration * 2])
     plt.show()

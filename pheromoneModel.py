@@ -183,7 +183,7 @@ def plotFracTable(frac_table = None):
 #Clamp the noise level, removing it as a free parameter.
 #This estimate comes from the initial evaluation of Experiemnts 1 & 2, in Fig. 4.
 gl_min_noise_level = .02
-gl_max_noise_level = .02
+gl_max_noise_level = .02001  #some versions of scipy don't allow min and max bounds to be equal
 
 gl_min_amp_C = .001
 

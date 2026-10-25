@@ -10,8 +10,9 @@ behavior in big headed ants.
   by ants" — Dussutour, Nicolis, Shephard, Beekman & Sumpter, J Exp Biol.
   2009;212:2337–2348, doi:10.1242/jeb.029827
 - This repo's paper: "A Single-Pheromone Model Accounts for Empirical Patterns
-  of Ant Colony Foraging Previously Modeled Using Two Pheromones" (submitted to
-  Cognitive Systems Research)
+  of Ant Colony Foraging Previously Modeled Using Two Pheromones" — Saund &
+  Friedman, Cognitive Systems Research 2023;80:81-89,
+  doi:10.1016/j.cogsys.2023.02.005
 
 ## Run / test
 

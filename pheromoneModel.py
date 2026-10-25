@@ -8,6 +8,8 @@
 #Our paper based on the model in this module is:
 #"A Single-Pheromone Model Accounts for Empirical Patterns of Ant Colony Foraging
 # Previously Modeled Using Two Pheromones"
+#E. Saund and D. A. Friedman
+#Cognitive Systems Research 2023;80: 81-89. doi:10.1016/j.cogsys.2023.02.005
 #
 #Our one pheromone model proposes that ants in the Dussutour experiment put down the same
 #kind of pheromone whether exploring or exploiting / gathering.  But they put down more
@@ -43,7 +45,10 @@
 #How to run:
 #
 
-#This runs in Python 3
+#This runs in Python 3.
+
+#Requires matplotlib, numpy, and scipy:
+#>>> python3 -m pip install matplotlib numpy scipy
 
 #>>> import pheromoneModel as ph
 
@@ -218,21 +223,25 @@ def figureDecayRate(c1=10, t=90, noise_level = .02):
 
 
 gl_decay_time = 90.0
-
-#This is no longer used in the simulation functions.
-#Instead, decay rate is computed from c1, noise level, and gl_decay_time.
-gl_decay = -.069
 # Estimated from the data, how long it takes
 # E+F vs. N to reach the pheromone noise level,
 # starting from c1 = 10.
+
+#Starting value only.  setupTable() recomputes gl_decay from c1, the noise level,
+#and gl_decay_time.  The analytical-model functions compute their own local decay
+#rate and do not use this global.
+gl_decay = -.069
 
 
 
 ####################
 #
-#Older method for setting parameters by global variables
-#These parameters are pretty much not used any more, but are kept for reference
-#and just in case.
+#Default values for the module-level model parameters.
+#These are the defaults of amplifySignal(), fracFromDistToMid(), and mapGetRatio();
+#parameter bundles (below) override them when running the analytical model.
+#gl_deposit_rate_exploit and gl_deposit_rate_explore are superseded by the
+#rate_exploit / rate_explore entries of the parameter bundles and are kept for
+#reference only.
 #
 
 gl_noise_level = .02
@@ -517,9 +526,6 @@ def runExp12_LookupModel(c1=10, c2=1):
     ax2 = fig.add_subplot(122)
     br1_ar = []   # exponential decaying pheromone on Branch A
     br2a_ar = []  # exponential decaying pheromone on Branch B
-    # fbr1_ar = [] # assigned but never used.
-    # fbr2a_ar = [] # assigned but never used.
-    # fbr2b_ar = [] # assigned but never used.
     ratio2a_ar = []
     ratio2b_ar = []
     for m in range(duration):   # duration is in minutes
@@ -611,9 +617,9 @@ def amplifySignal(x, amp_A = gl_amp_A, amp_B = gl_amp_B, amp_C = gl_amp_C):
     amp_signal = amp_A*pow((x - amp_B), amp_C)
     #print('x: ' + str(x) + ' amp_A: ' + str(amp_A) + ' amp_B: ' + str(amp_B) + ' amp_C: ' + str(amp_C) + ' amp_signal: ' + str(amp_signal))
     if math.isnan(amp_signal):
-        print('problem')
-        print('x: ' + str(x) + ' amp_A: ' + str(amp_A) + ' amp_B: ' + str(amp_B) + ' amp_C: ' + str(amp_C) + ' amp_signal: ' + str(amp_signal))
-        aa = 23/0
+        raise ValueError('amplifySignal produced NaN for x: ' + str(x)
+                         + ' amp_A: ' + str(amp_A) + ' amp_B: ' + str(amp_B)
+                         + ' amp_C: ' + str(amp_C))
     return amp_signal
 
     
@@ -1041,7 +1047,6 @@ def findOptimalParameters_Exp12_Exp4(initial_parameter_bundle = gl_initial_param
 #Dussutour Fig. 10.
 #A balance factor of .35 is used to equalize the number of samples provided from each experiment.
 #parameter_bundle is a list of parameters indexed by gl_parameter_index_dict
-#def exp12_exp4ScoreFunction(parameter_bundle, arg0):
 def exp12_exp4ScoreFunction(parameter_bundle):
     sse_exp12 = exp12ScoreFunction(parameter_bundle)
     sse_exp4 = exp4ScoreFunction(parameter_bundle)

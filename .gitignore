@@ -3,3 +3,7 @@
 *.xml
 __pycache__/
 *.pyc
+
+# OS, editor and Python cache files
+.idea/
+.DS_Store

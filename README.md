@@ -1,3 +1,7 @@
+# ant-pheromone
+
+Single-pheromone model of big-headed ant foraging (Saund & Friedman, Cognitive Systems Research 2023).
+
 The repository, ant-pheromone, contains the program, pheromoneModel.py.
 This program demonstrates that a single pheromone model accounts for certain experimental observations of foraging behavior in big headed ants.
 

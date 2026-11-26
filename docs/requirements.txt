@@ -1,0 +1,12 @@
+contourpy==1.4.0          # via matplotlib
+cycler==0.12.1            # via matplotlib
+fonttools==4.69.1         # via matplotlib
+kiwisolver==1.5.1         # via matplotlib
+matplotlib==3.10.8
+numpy==2.3.5              # via contourpy, matplotlib, scipy
+packaging==26.4           # via matplotlib
+pillow==13.0.0            # via matplotlib
+pyparsing==3.3.3          # via matplotlib
+python-dateutil==4.0.0    # via matplotlib
+scipy==1.17.0
+tzdata==2026.6            # via python-dateutil

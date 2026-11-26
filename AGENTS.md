@@ -28,7 +28,7 @@ E+F vs N.
 | `pheromoneModel.py` | The whole model, simulation, and figure generation |
 | `archives/` | Superseded implementations (`pheromone_simple_1.py`, `pheromones1.py`–`pheromones3.py`). Kept for provenance; not maintained |
 | `docs/AGENTS.md` | Directory-scoped guidance (single-file research code, no packaging, no CI) |
-| `README.md` | Purpose, citations, and run notes |
+| `README.md` | Purpose and links to the maintained documentation |
 
 There is no `src/`–`tests/` split, no packaging metadata, and no CI. Do not add
 them to "modernise" the repository: the module being directly importable is the
@@ -36,14 +36,9 @@ published artefact.
 
 ## Running
 
-Dependencies: `matplotlib`, `numpy`, `scipy`.
-
-```bash
-python3 -m pip install matplotlib numpy scipy
-python3 -c "import pheromoneModel as ph; ph.runExp12_LookupModel()"
-python3 -c "import pheromoneModel as ph; ph.runExp12_AnalyticalModel(ph.gl_parameter_bundle_opt_12)"
-python3 -c "import pheromoneModel as ph; ph.simulateDynamic(ph.gl_parameter_bundle_opt_4)"
-```
+Follow the [user guide](docs/README.md) for the pinned dependency setup,
+entry points, and native curve verification. The
+[reproduction manuscript](docs/manuscript/README.md) gives the PDF build.
 
 The module header lists every entry point, including the parameter-optimisation
 functions. `gl_parameter_bundle_opt_12` and `gl_parameter_bundle_opt_4` are the

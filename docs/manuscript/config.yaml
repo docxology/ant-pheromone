@@ -1,0 +1,24 @@
+paper:
+  title: "Reproducing a Single-Pheromone Model of Big-Headed Ant Foraging"
+  subtitle: "A software companion for the trail-decay and food-switch experiments"
+
+authors:
+  - name: "Eric Saund"
+  - name: "Daniel Ari Friedman"
+
+publication:
+  repository_url: "https://github.com/docxology/ant-pheromone"
+  release_status: "unreleased"
+
+metadata:
+  language: "en"
+
+manuscript_dir: "docs/manuscript"
+
+render:
+  formats:
+    pdf: true
+    html: false
+    slides: false
+    docx: false
+    epub: false

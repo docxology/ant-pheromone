@@ -1,0 +1,14 @@
+{
+  "schema_version": "ant-pheromone-figure-registry-v1",
+  "figures": [
+    {
+      "caption": "Model curves and transcribed observations for the decay and dynamic experiments. Dashed vertical lines mark the two food switches.",
+      "filename": "foraging-curves.png",
+      "generated_by": "docs/manuscript/assets/render_figure.py",
+      "label": "fig:foraging_curves",
+      "metadata": {
+        "alt_text": "Two panels show E+F preference declining in the decay experiments and branch-A preference falling then rising following the food switches."
+      }
+    }
+  ]
+}

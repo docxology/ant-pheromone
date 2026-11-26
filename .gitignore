@@ -7,3 +7,7 @@ __pycache__/
 # OS, editor and Python cache files
 .idea/
 .DS_Store
+
+# Local manuscript environment and output
+/.venv/
+/output/

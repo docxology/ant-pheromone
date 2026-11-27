@@ -14,6 +14,7 @@ run this command from the repository root.
 
 ## Render and validate
 
+Name the source checkout directory `ant-pheromone`.
 Use a clean source checkout and a separate clone of the
 [pinned template renderer](https://github.com/docxology/template/tree/87704feae0a4490ef7dad9c931d268e8c30273c2).
 Install Git, uv, Pandoc, XeLaTeX, and the TeX packages listed in the template
